@@ -1,0 +1,13 @@
+{
+  "name": "deriv-p2p-reversals",
+  "version": "1.0.0",
+  "description": "Deriv P2P Reversals form with Telegram notifications",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  }
+}

