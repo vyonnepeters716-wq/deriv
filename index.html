@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deriv P2P Reversals</title>
+  <meta name="description" content="Submit your Deriv P2P reversal request securely." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', 'Roboto', sans-serif;
+      background: radial-gradient(ellipse at center, #f0f2f5 0%, #d8dce3 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.06),
+        0 8px 24px rgba(0, 0, 0, 0.10);
+      padding: 40px 40px 36px;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Logo ── */
+    .logo-wrap {
+      margin-bottom: 24px;
+    }
+
+    .logo-svg {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+
+    /* ── Headings ── */
+    .card-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      font-weight: 400;
+      color: #85888d;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    /* ── Form ── */
+    .form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Floating label input wrapper */
+    .field {
+      position: relative;
+      width: 100%;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 18px 16px 6px;
+      border: 1.5px solid #dde0e5;
+      border-radius: 8px;
+      background: #f8f9fb;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a2e;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: text;
+    }
+
+    .field select {
+      cursor: pointer;
+      color: #85888d; /* placeholder-like color when empty */
+    }
+
+    .field select.has-value {
+      color: #1a1a2e;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #ff444f;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(255, 68, 79, 0.10);
+    }
+
+    /* Floating label */
+    .field label {
+      position: absolute;
+      top: 50%;
+      left: 16px;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #85888d;
+      pointer-events: none;
+      transition: top 0.18s ease, font-size 0.18s ease, color 0.18s ease;
+      transform-origin: left center;
+      background: transparent;
+    }
+
+    /* Float up when focused or has value */
+    .field input:focus + label,
+    .field input:not(:placeholder-shown) + label,
+    .field select:focus + label,
+    .field.filled label {
+      top: 10px;
+      transform: translateY(0);
+      font-size: 11px;
+      color: #ff444f;
+    }
+
+    /* Select dropdown arrow */
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #85888d;
+      pointer-events: none;
+      transition: border-top-color 0.2s;
+    }
+
+    .select-wrap:focus-within::after {
+      border-top-color: #ff444f;
+    }
+
+    /* ── Submit Button ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px 24px;
+      background: #ff444f;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 14px rgba(255, 68, 79, 0.35);
+    }
+
+    .btn-submit:hover {
+      background: #e0333e;
+      box-shadow: 0 6px 20px rgba(255, 68, 79, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(255, 68, 79, 0.25);
+    }
+
+    /* ── Links ── */
+    .forgot-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .link {
+      color: #ff444f;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .link:hover {
+      color: #c0272f;
+      text-decoration: underline;
+    }
+
+    .signup-wrap {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #85888d;
+      text-align: center;
+    }
+
+    .signup-wrap .link {
+      margin-left: 4px;
+    }
+
+    /* ── Toast / notification ── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #1a1a2e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 1000;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .card {
+        padding: 32px 24px 28px;
+      }
+      .card-title { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" role="main">
+
+    <!-- Deriv Logo (SVG inline) -->
+    <div class="logo-wrap" aria-label="Deriv logo">
+      <svg class="logo-svg" viewBox="0 0 120 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- "deriv" wordmark in Deriv Red -->
+        <text x="50%" y="34" text-anchor="middle"
+              font-family="'IBM Plex Sans', 'Roboto', sans-serif"
+              font-size="38"
+              font-weight="800"
+              fill="#ff444f"
+              letter-spacing="-1">deriv</text>
+      </svg>
+    </div>
+
+    <h1 class="card-title">Deriv P2P Reversals</h1>
+    <p class="card-subtitle">Submit your reversal</p>
+
+    <form class="form" id="reversalForm" novalidate>
+
+      <!-- Email -->
+      <div class="field">
+        <input type="email" id="email" name="email" placeholder=" " autocomplete="email" required />
+        <label for="email">Email</label>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password" required />
+        <label for="password">Password</label>
+      </div>
+
+      <!-- Order ID -->
+      <div class="field">
+        <input type="text" id="orderId" name="orderId" placeholder=" " required />
+        <label for="orderId">Order ID</label>
+      </div>
+
+      <!-- Reason for reversal -->
+      <div class="field select-wrap" id="reasonField">
+        <select id="reason" name="reason" required>
+          <option value="" disabled selected></option>
+          <option value="no_payment">No payment received</option>
+          <option value="no_proof">No payment proof</option>
+          <option value="fraud">Suspected fraud</option>
+          <option value="other">Other</option>
+        </select>
+        <label for="reason">Reason for reversal</label>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
+
+    </form>
+
+    <!-- Forgot password -->
+    <div class="forgot-wrap">
+      <a href="#" class="link" id="forgotPasswordLink" onclick="handleForgotPassword(event)">Forgot password?</a>
+    </div>
+
+    <!-- Sign up -->
+    <div class="signup-wrap">
+      <span>Don't have an account?</span>
+      <a href="#" class="link" id="signUpLink" onclick="handleSignUp(event)">Sign up</a>
+    </div>
+
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <script>
+    // ── Floating label for <select> ──
+    const reasonSelect = document.getElementById('reason');
+    const reasonField  = document.getElementById('reasonField');
+
+    function updateSelectLabel() {
+      if (reasonSelect.value) {
+        reasonField.classList.add('filled');
+        reasonSelect.classList.add('has-value');
+      } else {
+        reasonField.classList.remove('filled');
+        reasonSelect.classList.remove('has-value');
+      }
+    }
+
+    reasonSelect.addEventListener('change', updateSelectLabel);
+    reasonSelect.addEventListener('focus',  () => reasonField.classList.add('filled'));
+    reasonSelect.addEventListener('blur',   updateSelectLabel);
+
+    // ── Toast helper ──
+    function showToast(msg, duration = 3000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    // ── Form submission ──
+    document.getElementById('reversalForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const orderId  = document.getElementById('orderId').value.trim();
+      const reason   = document.getElementById('reason').value;
+
+      if (!email || !password || !orderId || !reason) {
+        showToast('Please fill in all fields.');
+        return;
+      }
+
+      const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRx.test(email)) {
+        showToast('Please enter a valid email address.');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.textContent = 'Submitting…';
+      btn.disabled = true;
+
+      // Simulate API call
+      setTimeout(() => {
+        showToast('Reversal submitted successfully!', 4000);
+        btn.textContent = 'Submit';
+        btn.disabled = false;
+        document.getElementById('reversalForm').reset();
+        reasonField.classList.remove('filled');
+        reasonSelect.classList.remove('has-value');
+      }, 1500);
+    });
+
+    // ── Placeholder link handlers ──
+    function handleForgotPassword(e) {
+      e.preventDefault();
+      showToast('Password reset link will be sent to your email.');
+    }
+
+    function handleSignUp(e) {
+      e.preventDefault();
+      showToast('Sign-up is currently by invitation only.');
+    }
+  </script>
+</body>
+</html>
