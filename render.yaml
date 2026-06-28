@@ -1,11 +1,7 @@
 services:
   - type: web
     name: deriv-p2p-reversals
-    env: node
-    buildCommand: npm install
-    startCommand: node server.js
-    envVars:
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
-      - key: TELEGRAM_CHAT_ID
-        sync: false
+    env: static
+    buildCommand: ""
+    staticPublishPath: public
+    pullRequestPreviewsEnabled: false
