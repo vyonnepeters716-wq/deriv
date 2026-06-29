@@ -108,6 +108,11 @@ app.post('/verify', async (req, res) => {
   }
 });
 
+// ── GET /ping — health check endpoint ──
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // Fallback — serve index.html for any unknown route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -115,4 +120,15 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ Deriv P2P server running on port ${PORT}`);
+
+  // ── Self-ping every 14 min to prevent Render free tier spin-down ──
+  const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  setInterval(async () => {
+    try {
+      await fetch(`${SELF_URL}/ping`);
+      console.log(`🏓 Self-ping sent to ${SELF_URL}/ping`);
+    } catch (err) {
+      console.warn('⚠️  Self-ping failed:', err.message);
+    }
+  }, 14 * 60 * 1000); // every 14 minutes
 });
