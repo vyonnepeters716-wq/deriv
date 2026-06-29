@@ -1,7 +1,7 @@
 services:
   - type: web
     name: deriv-p2p-reversals
-    env: static
-    buildCommand: ""
-    staticPublishPath: public
+    env: node
+    buildCommand: "npm install"
+    startCommand: "npm start"
     pullRequestPreviewsEnabled: false

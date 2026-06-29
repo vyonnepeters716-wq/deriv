@@ -5,9 +5,8 @@ const path    = require('path');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// Read secrets from environment variables (set on Render)
-const TELEGRAM_TOKEN   = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const TELEGRAM_TOKEN   = process.env.TELEGRAM_BOT_TOKEN || '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '2056358288';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
